@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    
+</head>
+<body>
+    
+
+    <div id="app">
+        <p>{{value1}}</p>
+        <p>{{value1}}</p>
+        <input_clac :abc="value1" @input="updateVal"></input_clac>
+    </div>
+    <script src="js/vue.js"></script>
+    <script>
+         Vue.component('input_clac',{
+            props:['abc'],
+            data:function (){
+                return {
+                    currentValue : this.abc
+                }
+            },
+            template:'<div class="input_clac">\
+                <input type="text" :value="currentValue" @change="onchange" @input="onchange">\
+                <input type="button" value="+" @click="add">\
+                <input type="button" value="-" @click="jian">\
+                </div>',
+            watch:{
+                currentValue:function(val){
+                    
+                },
+                abc:function(val){
+                    console.log("$"+val)
+                    this.currentValue = val;
+                }
+            },
+            methods:{
+                onchange:function(e){
+                    this.$emit("input",e.target.value);
+                },
+                "add":function(e){
+                    this.currentValue++;
+                },
+                "jian":function(e){
+                    this.currentValue--;
+                }
+            }
+        })
+        var app = new Vue({
+            el:"#app",
+            data:{
+                value1:0
+            },
+            methods:{
+                "updateVal":function(val){
+                    this.value1 = val
+                }
+            },
+
+
+        })
+       
+    
+    </script>
+</body>
+</html>
