@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        .page{
+            margin: 0 auto;
+            width: 400px;
+            height: 500px;
+            border: 1px solid #000;
+            background-color: #666;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="app" v-cloak>
+        <page-manage v-model="activekey">
+            <pane page="1">
+                页面一
+            </pane>     
+            <pane page="2">
+                页面二
+            </pane>     
+            <pane page="3">
+                页面三
+            </pane>     
+        </page-manage>
+    </div>
+    <script src="js/vue.js"></script>
+    <script>
+
+    Vue.component('pane',{
+        props:{
+            page:{
+                type:String
+            },
+
+        },
+        template:'<div class="page" v-show="show">\
+                <slot></slot><br>\
+                <input v-model="currentPage"><br>\
+            <input type="checkbox" v-model="ck.no1" name="ck">  \
+            <input type="checkbox" v-model="ck.no2" name="ck">  <br>\
+            <div style="display:flex">\
+            <button style="flex:1" @click="prevPage" v-show="page>1">上一步</button>\
+            <button style="flex:1;" @click="nextPage" :disabled="isConform" v-show="page<3">下一步</button>\
+            <button style="flex:1" @click="Reset">重置</button>\
+            </div>\
+        </div>',
+        data:function(){
+            return {
+                show:true,
+                currentPage:this.page,
+                ck:{no1:false,no2:true},
+                isConform:true
+            }
+        },
+        methods:{
+            nextPage(){
+               this.$parent.currentValue = String(parseInt(this.page)+1)
+            },
+            prevPage(){
+               this.$parent.currentValue = String(parseInt(this.page)-1)
+            },
+            Reset(){
+                this.currentPage = "";
+                for (const key in this.ck) {
+                    if (this.ck.hasOwnProperty(key)) {
+                        this.ck[key] = false;
+                    }
+                }
+            }
+            
+        },
+        computed:{
+            checkNextPage(){
+                let temp = false;
+                for (const key in this.ck) {
+                    if (this.ck.hasOwnProperty(key)) {
+                        if(this.ck[key]){
+                            temp = true;
+                        }
+                    }
+                }
+                if(temp && (this.currentPage.length>5)){
+                    return false;
+                }else{
+                    return true;
+                }
+            }
+        },
+        watch:{
+            ck:{
+                handler(){
+                    this.isConform = this.checkNextPage
+                },
+                deep:true
+            },
+            currentPage(){
+                this.isConform = this.checkNextPage
+            }
+        }
+
+    })
+    
+    Vue.component("page-manage",{
+        props:{
+            value:[String]
+        },
+        template: '\
+            <div class="page">\
+                <slot></slot>\
+            </div>\
+        ',
+        data:function (){
+            return {
+                currentValue : this.value
+            }
+        },
+        methods:{
+            getPages(){
+                return this.$children.filter(function(item){
+                    return item.$options.name === 'pane';
+                })
+            },
+            updateStatus(){
+                var pages = this.getPages();
+                var _this = this;
+                pages.forEach(element => {
+                    element.show = _this.currentValue == element.page
+                });
+            },
+            change(val){
+                this.currentPage = val
+            }
+        },
+        watch:{
+            value(val){
+                this.currentValue =  val
+                this.updateStatus()
+            },
+            currentValue(val){
+                this.$emit("input",val)
+            }
+        },
+        mounted:function(){
+            this.updateStatus();
+        }
+
+    })
+
+var app = new Vue({
+    el:"#app",
+    data:{
+        activekey:"1"
+    }
+})
+
+    </script>
+</body>
+</html>
